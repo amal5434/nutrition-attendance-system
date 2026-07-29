@@ -3,10 +3,37 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count
 
+from django.db.models import Q
 from customers.models import Customer
 from billing.models import CustomerPlan
 from .models import Attendance
 
+
+def attendance_home(request):
+
+    query = request.GET.get('q', '').strip()
+
+    customer = None
+    active_plan = None
+
+    if query:
+
+        customer = Customer.objects.filter(
+            Q(customer_code__icontains=query) |
+            Q(phone__icontains=query)
+        ).first()
+
+        if customer:
+            active_plan = CustomerPlan.objects.filter(
+                customer=customer,
+                remaining_days__gt=0
+            ).first()
+
+    return render(request, 'attendance/attendance_home.html', {
+        'query': query,
+        'customer': customer,
+        'active_plan': active_plan,
+    })
 
 def attendance_list(request):
 
@@ -61,7 +88,7 @@ def check_in(request, customer_id):
         f'Attendance marked successfully. Remaining days: {customer_plan.remaining_days}'
     )
 
-    return redirect('attendance_list')
+    return redirect('home')
 def attendance_report(request):
 
     report = Attendance.objects.values(
