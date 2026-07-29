@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: nutrition-attendance
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn nutrition.wsgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: nutrition.settings

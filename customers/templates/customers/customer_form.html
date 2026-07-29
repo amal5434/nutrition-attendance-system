@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-success text-white">
+            <h4>Add Customer</h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Customer Code</label>
+                        {{ form.customer_code }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Phone</label>
+                        {{ form.phone }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Gender</label>
+                        {{ form.gender }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Age</label>
+                        {{ form.age }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Joining Date</label>
+                        {{ form.joining_date }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Status</label>
+                        {{ form.status }}
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <button class="btn btn-success">
+                    Save Customer
+                </button>
+
+                <a href="{% url 'customer_list' %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

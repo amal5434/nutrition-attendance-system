@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card shadow animate__animated animate__fadeInUp">
+
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Create Invoice</h4>
+    </div>
+
+    <div class="card-body">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Customer</label>
+                    {{ form.customer }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Plan</label>
+                    {{ form.plan }}
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Discount Type</label>
+                    {{ form.discount_type }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Discount Value</label>
+                    {{ form.discount_value }}
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Payment Received</label>
+                {{ form.payment_received }}
+            </div>
+
+            <hr>
+
+            <div class="row text-center">
+
+                <div class="col-md-4">
+                    <div class="border rounded p-3 bg-light">
+                        <small class="text-muted d-block">Package Price</small>
+                        <h5 class="mb-0">₹<span id="packagePrice">0.00</span></h5>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="border rounded p-3 bg-light">
+                        <small class="text-muted d-block">Final Amount</small>
+                        <h5 class="mb-0 text-success">₹<span id="finalAmount">0.00</span></h5>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="border rounded p-3 bg-light">
+                        <small class="text-muted d-block">Balance</small>
+                        <h5 class="mb-0 text-danger">₹<span id="balanceAmount">0.00</span></h5>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    Generate Invoice
+                </button>
+
+                <a href="/customers/" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+const planSelect = document.getElementById('id_plan');
+const discountType = document.getElementById('id_discount_type');
+const discountValue = document.getElementById('id_discount_value');
+const paymentReceived = document.getElementById('id_payment_received');
+
+let packagePrice = 0;
+
+function updateSummary() {
+    let finalAmount = packagePrice;
+    const discount = parseFloat(discountValue.value || 0);
+    const paid = parseFloat(paymentReceived.value || 0);
+
+    if (discountType.value === 'Fixed') {
+        finalAmount -= discount;
+    }
+
+    if (discountType.value === 'Percentage') {
+        finalAmount -= packagePrice * discount / 100;
+    }
+
+    if (finalAmount < 0) {
+        finalAmount = 0;
+    }
+
+    const balance = finalAmount - paid;
+
+    document.getElementById('packagePrice').innerText = packagePrice.toFixed(2);
+    document.getElementById('finalAmount').innerText = finalAmount.toFixed(2);
+    document.getElementById('balanceAmount').innerText = balance.toFixed(2);
+}
+
+planSelect.addEventListener('change', async function () {
+    if (!this.value) return;
+
+    const response = await fetch(`/plans/price/${this.value}/`);
+    const data = await response.json();
+
+    packagePrice = parseFloat(data.price);
+
+    updateSummary();
+});
+
+discountType.addEventListener('change', updateSummary);
+discountValue.addEventListener('input', updateSummary);
+paymentReceived.addEventListener('input', updateSummary);
+</script>
+
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+
+<!-- Page Title -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-success mb-0">Dashboard</h3>
+    <small class="text-muted">Nutrition Attendance System</small>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row">
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-primary text-white shadow border-0 h-100 animate__animated animate__fadeInUp">
+            <div class="card-body">
+                <h6 class="text-uppercase small mb-2">Total Customers</h6>
+                <h2 class="fw-bold mb-0">{{ total_customers }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white shadow border-0 h-100 animate__animated animate__fadeInUp">
+            <div class="card-body">
+                <h6 class="text-uppercase small mb-2">Active Plans</h6>
+                <h2 class="fw-bold mb-0">{{ active_plans }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-warning text-dark shadow border-0 h-100 animate__animated animate__fadeInUp">
+            <div class="card-body">
+                <h6 class="text-uppercase small mb-2">Today's Attendance</h6>
+                <h2 class="fw-bold mb-0">{{ today_attendance }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-danger text-white shadow border-0 h-100 animate__animated animate__fadeInUp">
+            <div class="card-body">
+                <h6 class="text-uppercase small mb-2">Revenue Today</h6>
+                <h2 class="fw-bold mb-0">₹{{ today_revenue }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Revenue Chart -->
+<div class="card shadow border-0 mb-4 animate__animated animate__fadeInUp">
+
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-success">Revenue Trend</h5>
+        <small class="text-muted">Recent invoice payments</small>
+    </div>
+
+    <div class="card-body">
+        <canvas id="revenueChart" height="100"></canvas>
+    </div>
+
+</div>
+
+<!-- Quick Actions -->
+<div class="card shadow border-0 animate__animated animate__fadeInUp">
+
+    <div class="card-header bg-light">
+        <h5 class="mb-0 text-success">Quick Actions</h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="d-flex flex-wrap gap-2">
+
+            <a href="{% url 'customer_add' %}" class="btn btn-primary">
+                + Add Customer
+            </a>
+
+            <a href="{% url 'plan_add' %}" class="btn btn-success">
+                + Add Plan
+            </a>
+
+            <a href="{% url 'invoice_create' %}" class="btn btn-warning text-dark">
+                + Create Invoice
+            </a>
+
+            <a href="{% url 'attendance_list' %}" class="btn btn-info text-white">
+                Attendance
+            </a>
+
+            <a href="{% url 'attendance_report' %}" class="btn btn-secondary">
+                Attendance Report
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="col-md-3 mb-4">
+    <div class="card bg-success text-white shadow-lg h-100
+                animate__animated animate__fadeInUp">
+        <div class="card-body text-center">
+            <i class="bi bi-people-fill fs-1 mb-2"></i>
+            <h6>Total Customers</h6>
+            <h2 class="fw-bold">{{ total_customers }}</h2>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- Chart.js -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('revenueChart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: {{ chart_data|safe }},
+            borderColor: 'rgb(25, 135, 84)',
+            backgroundColor: 'rgba(25, 135, 84, 0.2)',
+            tension: 0.4,
+            fill: true,
+            borderWidth: 3,
+            pointRadius: 5,
+            pointBackgroundColor: 'rgb(25, 135, 84)',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}
