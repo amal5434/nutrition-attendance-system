@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import Plan
 from .forms import PlanForm
 from django.http import JsonResponse
 
 
+@login_required
 def plan_list(request):
 
     plans = Plan.objects.all().order_by("name")
@@ -15,6 +17,7 @@ def plan_list(request):
     )
 
 
+@login_required
 def plan_add(request):
 
     if request.method == "POST":
@@ -34,6 +37,8 @@ def plan_add(request):
         {"form": form}
     )
 
+
+@login_required
 def plan_price(request, plan_id):
 
     plan = Plan.objects.get(id=plan_id)
@@ -42,6 +47,9 @@ def plan_price(request, plan_id):
         "price": float(plan.price),
         "days": plan.attendance_days,
     })
+
+
+@login_required
 def plan_edit(request, plan_id):
 
     plan = get_object_or_404(Plan, id=plan_id)
@@ -61,6 +69,7 @@ def plan_edit(request, plan_id):
     })
 
 
+@login_required
 def plan_toggle_status(request, plan_id):
 
     plan = get_object_or_404(Plan, id=plan_id)
@@ -75,6 +84,7 @@ def plan_toggle_status(request, plan_id):
     return redirect("plan_list")
 
 
+@login_required
 def plan_delete(request, plan_id):
 
     plan = get_object_or_404(Plan, id=plan_id)

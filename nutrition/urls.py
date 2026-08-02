@@ -1,11 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
 from attendance import views as attendance_views
+from accounts import views as account_views
 
 urlpatterns = [
-
     # MAIN PAGE
     path('', attendance_views.attendance_home, name='home'),
+
+    path('login/', include('accounts.urls')),
+    path('logout/', account_views.logout_view, name='logout'),
 
     path('admin/', admin.site.urls),
     path('customers/', include('customers.urls')),

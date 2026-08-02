@@ -21,19 +21,56 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 <style>
+    html {
+        scroll-behavior: smooth;
+    }
+
     body {
         background: #f5f7fb;
         font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* Custom Modern Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #eef2f5;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #198754;
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #146c43;
     }
 
     .navbar {
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
+    /* Top Scroll Progress Bar */
+    #scroll-progress-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: transparent;
+        z-index: 9999;
+    }
+    #scroll-progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #198754, #20c997, #0dcaf0);
+        border-top-right-radius: 2px;
+        border-bottom-right-radius: 2px;
+    }
+
     .card {
         border: none;
         border-radius: 16px;
-        transition: all 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .card:hover {
@@ -63,12 +100,47 @@
         padding-left: 10px;
         color: #198754 !important;
     }
+
+    /* Floating Back-To-Top Button */
+    #back-to-top {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transform: scale(0);
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Scroll Reveal Initial Hide Class */
+    .scroll-reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        will-change: opacity, transform;
+    }
 </style>
 
 
 </head>
 
 <body>
+
+<!-- Top Scroll Progress Bar -->
+<div id="scroll-progress-container">
+    <div id="scroll-progress-bar"></div>
+</div>
+
+<!-- Floating Back-to-Top Button -->
+<button id="back-to-top" class="btn btn-success text-white shadow-lg" title="Back to Top">
+    <i class="bi bi-arrow-up-short fs-3"></i>
+</button>
 
 <!-- Navbar -->
 
@@ -89,57 +161,79 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
 
-<ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav me-auto">
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link sidebar-link" href="{% url 'home' %}">
+                        <i class="bi bi-calendar-check me-1"></i> Attendance
+                    </a>
+                </li>
 
-    <!-- MAIN FEATURE -->
-    <li class="nav-item">
-        <a class="nav-link sidebar-link active"
-           href="{% url 'home' %}">
-            <i class="bi bi-calendar-check me-1"></i> Attendance
-        </a>
-    </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-link" href="{% url 'customer_list' %}">
+                        <i class="bi bi-people me-1"></i> Customers
+                    </a>
+                </li>
 
-    <li class="nav-item">
-        <a class="nav-link sidebar-link"
-           href="{% url 'customer_list' %}">
-            <i class="bi bi-people me-1"></i> Customers
-        </a>
-    </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-link" href="{% url 'plan_list' %}">
+                        <i class="bi bi-box-seam me-1"></i> Plans
+                    </a>
+                </li>
 
-    <li class="nav-item">
-        <a class="nav-link sidebar-link"
-           href="{% url 'plan_list' %}">
-            <i class="bi bi-box-seam me-1"></i> Plans
-        </a>
-    </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-link" href="{% url 'invoice_list' %}">
+                        <i class="bi bi-receipt me-1"></i> Billing
+                    </a>
+                </li>
 
-    <li class="nav-item">
-        <a class="nav-link sidebar-link"
-           href="{% url 'invoice_list' %}">
-            <i class="bi bi-receipt me-1"></i> Billing
-        </a>
-    </li>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-link" href="{% url 'report_home' %}">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i> Reports
+                    </a>
+                </li>
 
-    <li class="nav-item">
-        <a class="nav-link sidebar-link"
-           href="{% url 'report_home' %}">
-            <i class="bi bi-file-earmark-bar-graph me-1"></i> Reports
-        </a>
-    </li>
+                <!-- Dashboard is visible ONLY for Admin (superuser) -->
+                {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link sidebar-link" href="{% url 'dashboard_home' %}">
+                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                        </a>
+                    </li>
+                {% endif %}
+            {% endif %}
+        </ul>
 
-    <li class="nav-item">
-        <a class="nav-link sidebar-link"
-           href="{% url 'dashboard_home' %}">
-            <i class="bi bi-speedometer2 me-1"></i> Dashboard
-        </a>
-    </li>
-
-</ul>
+        <ul class="navbar-nav ms-auto align-items-center">
+            {% if user.is_authenticated %}
+                <li class="nav-item me-2">
+                    {% if user.is_superuser %}
+                        <span class="badge bg-dark text-white border border-light py-2 px-3">
+                            <i class="bi bi-shield-check me-1 text-warning"></i> Admin: {{ user.username }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-info text-white py-2 px-3">
+                            <i class="bi bi-person-badge me-1"></i> Staff: {{ user.username }}
+                        </span>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm px-3">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a href="{% url 'login' %}" class="btn btn-light btn-sm text-success fw-bold px-3">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
 
     </div>
 
 </div>
-
 
 </nav>
 
@@ -157,8 +251,154 @@
 </div>
 
 <!-- Bootstrap JS -->
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Anime.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initial Page Card Animations
+    const cards = document.querySelectorAll('.anime-card, .card');
+    if (cards.length > 0) {
+        anime({
+            targets: cards,
+            translateY: [25, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(80, {start: 100}),
+            duration: 650,
+            easing: 'easeOutCubic'
+        });
+    }
+
+    // 2. Table Row Stagger Animations
+    const tableRows = document.querySelectorAll('.table tbody tr');
+    if (tableRows.length > 0) {
+        anime({
+            targets: tableRows,
+            translateX: [-15, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(40, {start: 250}),
+            duration: 450,
+            easing: 'easeOutQuad'
+        });
+    }
+
+    // 3. Scroll-Triggered Reveal via IntersectionObserver & Anime.js
+    const revealElements = document.querySelectorAll('.scroll-reveal');
+    if (revealElements.length > 0) {
+        const observerOptions = {
+            root: null,
+            threshold: 0.15
+        };
+
+        const scrollObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    anime({
+                        targets: entry.target,
+                        translateY: [35, 0],
+                        opacity: [0, 1],
+                        scale: [0.98, 1],
+                        duration: 700,
+                        easing: 'easeOutCubic'
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        revealElements.forEach(el => scrollObserver.observe(el));
+    }
+
+    // 4. Scroll Progress Bar & Back-to-Top Button Trigger
+    const progressBar = document.getElementById('scroll-progress-bar');
+    const backToTopBtn = document.getElementById('back-to-top');
+    let isBtnVisible = false;
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrollPercent = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+
+        if (progressBar) {
+            progressBar.style.width = scrollPercent + '%';
+        }
+
+        // Back-to-Top Button Anime.js trigger
+        if (scrollTop > 200 && !isBtnVisible) {
+            isBtnVisible = true;
+            anime({
+                targets: backToTopBtn,
+                scale: [0, 1],
+                opacity: [0, 1],
+                duration: 350,
+                easing: 'easeOutBack'
+            });
+        } else if (scrollTop <= 200 && isBtnVisible) {
+            isBtnVisible = false;
+            anime({
+                targets: backToTopBtn,
+                scale: [1, 0],
+                opacity: [1, 0],
+                duration: 250,
+                easing: 'easeInQuad'
+            });
+        }
+    });
+
+    if (backToTopBtn) {
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // 5. Button Hover & Press Micro-Animations
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            anime({
+                targets: btn,
+                scale: 1.04,
+                duration: 200,
+                easing: 'easeOutQuad'
+            });
+        });
+        btn.addEventListener('mouseleave', () => {
+            anime({
+                targets: btn,
+                scale: 1.0,
+                duration: 200,
+                easing: 'easeOutQuad'
+            });
+        });
+        btn.addEventListener('mousedown', () => {
+            anime({
+                targets: btn,
+                scale: 0.96,
+                duration: 100,
+                easing: 'easeOutQuad'
+            });
+        });
+    });
+});
+
+// Helper utility for count-up stat animations
+function animateStatCounter(elementId, targetValue, prefix = '', suffix = '') {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const obj = { val: 0 };
+    anime({
+        targets: obj,
+        val: targetValue,
+        round: 1,
+        duration: 1400,
+        easing: 'easeOutExpo',
+        update: function() {
+            el.textContent = prefix + obj.val.toLocaleString() + suffix;
+        }
+    });
+}
+</script>
 
 </body>
 </html>

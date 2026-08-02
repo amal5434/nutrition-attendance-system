@@ -53,7 +53,7 @@
 
                 {% if customer %}
 
-                    <div class="card border-success shadow-sm">
+                    <div class="card border-success shadow-sm anime-customer-card">
 
                         <div class="card-body">
 
@@ -85,7 +85,7 @@
                                         <p class="mb-0">
                                             <strong>Remaining Days:</strong>
 
-                                            <span class="badge bg-success fs-6 ms-2">
+                                            <span class="badge bg-success fs-6 ms-2 anime-badge">
                                                 {{ active_plan.remaining_days }}
                                             </span>
                                         </p>
@@ -99,9 +99,10 @@
                                     {% if active_plan %}
 
                                         <a href="{% url 'check_in' customer.id %}"
-                                           class="btn btn-success btn-lg w-100 py-3">
+                                           id="btn-mark-attendance"
+                                           class="btn btn-success btn-lg w-100 py-3 shadow">
 
-                                            Mark Attendance
+                                            <i class="bi bi-check-circle-fill me-2"></i>Mark Attendance
 
                                         </a>
 
@@ -152,5 +153,33 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Anime.js Elastic Pop-in for customer search result card
+    const custCard = document.querySelector('.anime-customer-card');
+    if (custCard) {
+        anime({
+            targets: custCard,
+            scale: [0.9, 1],
+            opacity: [0, 1],
+            duration: 600,
+            easing: 'easeOutElastic(1, .8)'
+        });
+    }
+
+    // Continuous soft pulse for Mark Attendance button
+    const checkInBtn = document.getElementById('btn-mark-attendance');
+    if (checkInBtn) {
+        anime({
+            targets: checkInBtn,
+            scale: [1, 1.03, 1],
+            loop: true,
+            duration: 2000,
+            easing: 'easeInOutSine'
+        });
+    }
+});
+</script>
 
 {% endblock %}

@@ -1,13 +1,22 @@
-from django.shortcuts import render
+import json
+from datetime import timedelta
+from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from customers.models import Customer
 from billing.models import CustomerPlan, Invoice
 from attendance.models import Attendance
 
 
+@login_required
 def dashboard_home(request):
+    # Only Admin (superuser) users can view the dashboard & revenue metrics
+    if not request.user.is_superuser:
+        messages.warning(request, "Access Denied: Staff members do not have access to financial revenue metrics.")
+        return redirect('home')
 
     today = timezone.now().date()
 
@@ -27,24 +36,24 @@ def dashboard_home(request):
         total=Sum('payment_received')
     )['total'] or 0
 
-    # Last 7 invoices for chart
-    invoices = Invoice.objects.order_by('-created_at')[:7]
+    # Calculate last 7 consecutive days of revenue
+    chart_labels = []
+    chart_data = []
 
-    chart_labels = [
-        invoice.created_at.strftime('%d %b')
-        for invoice in reversed(invoices)
-    ]
+    for i in range(6, -1, -1):
+        day = today - timedelta(days=i)
+        day_revenue = Invoice.objects.filter(
+            created_at__date=day
+        ).aggregate(total=Sum('payment_received'))['total'] or 0
 
-    chart_data = [
-        float(invoice.payment_received)
-        for invoice in reversed(invoices)
-    ]
+        chart_labels.append(day.strftime('%d %b'))
+        chart_data.append(float(day_revenue))
 
     return render(request, 'dashboard/home.html', {
         'total_customers': total_customers,
         'active_plans': active_plans,
         'today_attendance': today_attendance,
         'today_revenue': today_revenue,
-        'chart_labels': chart_labels,
-        'chart_data': chart_data,
+        'chart_labels_json': json.dumps(chart_labels),
+        'chart_data_json': json.dumps(chart_data),
     })

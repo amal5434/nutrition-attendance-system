@@ -2,11 +2,13 @@ from decimal import Decimal
 from datetime import date, timedelta
 
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 from .forms import InvoiceForm
 from .models import Invoice, CustomerPlan
 
 
+@login_required
 def invoice_create(request):
 
     if request.method == "POST":
@@ -62,6 +64,7 @@ def invoice_create(request):
         form = InvoiceForm()
 
     return render(request, "billing/invoice_form.html", {"form": form})
+@login_required
 def invoice_list(request):
 
     invoices = Invoice.objects.select_related(

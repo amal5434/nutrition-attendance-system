@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count, Q
+from django.contrib.auth.decorators import login_required
 
-from django.db.models import Q
 from customers.models import Customer
 from billing.models import CustomerPlan
 from .models import Attendance
 
 
+@login_required
 def attendance_home(request):
 
     query = request.GET.get('q', '').strip()
@@ -35,6 +36,7 @@ def attendance_home(request):
         'active_plan': active_plan,
     })
 
+@login_required
 def attendance_list(request):
 
     attendances = Attendance.objects.select_related(
@@ -47,6 +49,7 @@ def attendance_list(request):
     })
 
 
+@login_required
 def check_in(request, customer_id):
 
     customer = get_object_or_404(Customer, id=customer_id)
@@ -89,6 +92,9 @@ def check_in(request, customer_id):
     )
 
     return redirect('home')
+
+
+@login_required
 def attendance_report(request):
 
     report = Attendance.objects.values(

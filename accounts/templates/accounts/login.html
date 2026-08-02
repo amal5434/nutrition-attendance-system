@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center align-items-center py-4">
+
+    <div class="col-md-6 col-lg-5">
+
+        <div class="card shadow-lg border-0 anime-card overflow-hidden">
+
+            <!-- Card Header Header / Tabs -->
+            <div class="card-header bg-dark text-white p-0">
+
+                <div class="text-center py-4 bg-gradient bg-success">
+                    <h3 class="fw-bold mb-1 text-white">
+                        <i class="bi bi-shield-lock-fill me-2"></i>Portal Login
+                    </h3>
+                    <small class="text-white-50">Nutrition Attendance System</small>
+                </div>
+
+                <!-- Navigation Tabs for Admin vs Staff -->
+                <ul class="nav nav-pills nav-justified bg-dark p-2" id="loginTabs" role="tablist">
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if role != 'staff' %}active bg-success text-white{% else %}text-light{% endif %} fw-semibold rounded-pill py-2"
+                                id="admin-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#admin-login-panel"
+                                type="button"
+                                role="tab">
+                            <i class="bi bi-person-badge-fill me-1"></i> Admin Login
+                        </button>
+                    </li>
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if role == 'staff' %}active bg-info text-white{% else %}text-light{% endif %} fw-semibold rounded-pill py-2"
+                                id="staff-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#staff-login-panel"
+                                type="button"
+                                role="tab">
+                            <i class="bi bi-people-fill me-1"></i> Staff Login
+                        </button>
+                    </li>
+
+                </ul>
+
+            </div>
+
+            <div class="card-body p-4">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="tab-content" id="loginTabContent">
+
+                    <!-- Admin Login Panel -->
+                    <div class="tab-pane fade {% if role != 'staff' %}show active{% endif %}" id="admin-login-panel" role="tabpanel">
+
+                        <div class="alert alert-success border-success text-success small py-2 mb-3 bg-light">
+                            <i class="bi bi-shield-check me-1"></i> <strong>Admin Privileges:</strong> Full system access including Financial Revenue & Dashboard.
+                        </div>
+
+                        <form method="POST" action="{% url 'admin_login' %}">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Admin Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                    <input type="text" name="username" class="form-control" placeholder="Enter admin username" required autofocus>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm">
+                                Login as Admin <i class="bi bi-arrow-right-circle ms-1"></i>
+                            </button>
+                        </form>
+
+                        <div class="mt-4 pt-3 border-top text-center text-muted small">
+                            Demo Admin: <code class="bg-light px-2 py-1 rounded border">admin</code> / Password: <code class="bg-light px-2 py-1 rounded border">admin123</code>
+                        </div>
+
+                    </div>
+
+                    <!-- Staff Login Panel -->
+                    <div class="tab-pane fade {% if role == 'staff' %}show active{% endif %}" id="staff-login-panel" role="tabpanel">
+
+                        <div class="alert alert-info border-info text-info small py-2 mb-3 bg-light">
+                            <i class="bi bi-person-workspace me-1"></i> <strong>Staff Privileges:</strong> Attendance check-in, customer management & billing operations.
+                        </div>
+
+                        <form method="POST" action="{% url 'staff_login' %}">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Staff Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                    <input type="text" name="username" class="form-control" placeholder="Enter staff username" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-info text-white btn-lg w-100 fw-bold shadow-sm">
+                                Login as Staff <i class="bi bi-arrow-right-circle ms-1"></i>
+                            </button>
+                        </form>
+
+                        <div class="mt-4 pt-3 border-top text-center text-muted small">
+                            Demo Staff: <code class="bg-light px-2 py-1 rounded border">staff</code> / Password: <code class="bg-light px-2 py-1 rounded border">staff123</code>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Add active styling sync to login tabs
+    const adminTab = document.getElementById('admin-tab');
+    const staffTab = document.getElementById('staff-tab');
+
+    if (adminTab && staffTab) {
+        adminTab.addEventListener('shown.bs.tab', () => {
+            adminTab.classList.add('bg-success', 'text-white');
+            adminTab.classList.remove('text-light');
+            staffTab.classList.remove('bg-info', 'text-white');
+            staffTab.classList.add('text-light');
+        });
+
+        staffTab.addEventListener('shown.bs.tab', () => {
+            staffTab.classList.add('bg-info', 'text-white');
+            staffTab.classList.remove('text-light');
+            adminTab.classList.remove('bg-success', 'text-white');
+            adminTab.classList.add('text-light');
+        });
+    }
+});
+</script>
+
+{% endblock %}

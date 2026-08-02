@@ -2,6 +2,7 @@ import pandas as pd
 
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 from reportlab.platypus import SimpleDocTemplate, Table
 from reportlab.lib.pagesizes import letter
@@ -10,12 +11,14 @@ from billing.models import Invoice
 from attendance.models import Attendance
 
 
+@login_required
 def report_home(request):
     return render(request, 'reports/report_home.html')
 
 
 # ---------------- EXCEL ----------------
 
+@login_required
 def invoice_excel(request):
 
     invoices = Invoice.objects.select_related('customer', 'plan')
@@ -49,6 +52,7 @@ def invoice_excel(request):
 
 # ---------------- PDF ----------------
 
+@login_required
 def invoice_pdf(request):
 
     response = HttpResponse(content_type='application/pdf')
@@ -78,6 +82,7 @@ def invoice_pdf(request):
 
 # ---------------- ATTENDANCE EXCEL ----------------
 
+@login_required
 def attendance_excel(request):
 
     records = Attendance.objects.select_related('customer', 'customer_plan')
@@ -109,6 +114,7 @@ def attendance_excel(request):
 
 # ---------------- ATTENDANCE PDF ----------------
 
+@login_required
 def attendance_pdf(request):
 
     response = HttpResponse(content_type='application/pdf')
