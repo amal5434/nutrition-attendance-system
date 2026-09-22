@@ -106,3 +106,16 @@ def attendance_report(request):
     return render(request, 'attendance/attendance_report.html', {
         'report': report
     })
+from django.utils import timezone
+
+def attendance_home(request):
+
+    query = request.GET.get('q', '')
+
+    return render(request, 'attendance/attendance_home.html', {
+        'query': query,
+        'now': timezone.now(),
+        'today_present': 28,
+        'today_absent': 5,
+        'active_members': 142,
+    })
